@@ -1,7 +1,53 @@
 {
   "version": 1,
   "minimum_trigger_score": 2,
+
   "keywords": [
+    {
+      "phrase": "any better way",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "how do people handle",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "what do you use for",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "is there a system for",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "managing leads is",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "spending too much time",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "anyone using software",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "manual process",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "tracking this in spreadsheets",
+      "score": 2,
+      "category": "explicit_intent"
+    },
     {
       "phrase": "need a tool",
       "score": 1,

@@ -1,11 +1,21 @@
-export default function tagVertical(record, verticals) {
-  const text = record.text.toLowerCase();
+export default function tagVerticals(record, verticalConfig) {
+  const text = `${record.title} ${record.body}`.toLowerCase();
 
-  for (const [vertical, terms] of Object.entries(verticals)) {
-    if (terms.some(t => text.includes(t))) {
-      return vertical;
+  if (!verticalConfig?.verticals?.length) {
+    return [];
+  }
+
+  const matched = [];
+
+  for (const vertical of verticalConfig.verticals) {
+    const { name, keywords } = vertical;
+
+    if (!Array.isArray(keywords)) continue;
+
+    if (keywords.some(k => text.includes(k.toLowerCase()))) {
+      matched.push(name);
     }
   }
 
-  return 'unknown';
+  return matched.length ? matched : ['unknown'];
 }

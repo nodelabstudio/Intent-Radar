@@ -1,4 +1,4 @@
-import qb from './quickbase.js';
+import qb from './qb.js';
 
 export default async function upsert(record) {
   return qb.upsert('Inbound Lead Signals', {

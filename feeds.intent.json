@@ -4,5 +4,41 @@
     "type": "reddit",
     "subreddit": "realestate",
     "sort": "new"
+  },
+  {
+    "source": "Reddit: r/RealEstateAgents",
+    "type": "reddit",
+    "subreddit": "RealEstateAgents",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/realtors",
+    "type": "reddit",
+    "subreddit": "realtors",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/smallbusiness",
+    "type": "reddit",
+    "subreddit": "smallbusiness",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/EntrepreneurRideAlong",
+    "type": "reddit",
+    "subreddit": "EntrepreneurRideAlong",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/RealEstateTechnology",
+    "type": "reddit",
+    "subreddit": "EntrepreneurRideAlong",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/RealEstateMarketing",
+    "type": "reddit",
+    "subreddit": "EntrepreneurRideAlong",
+    "sort": "new"
   }
 ]

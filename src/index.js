@@ -18,12 +18,16 @@ if (!Array.isArray(feeds) || feeds.length === 0) {
 
 for (const feed of feeds) {
   const items = await fetchRedditRss(feed);
+  console.log(`[DEBUG] ${feed.source}: fetched ${items.length} items`);
 
   for (const raw of items) {
     const record = normalize(raw);
 
+    console.log('[DEBUG] checking post:', record.title);
     const score = scoreIntent(record, keywords);
     if (!score.qualifies) continue;
+
+    console.log('[DEBUG] score result:', score);
 
     let ai = { qualified: true, reason: 'dry-run bypass' };
 
@@ -33,14 +37,14 @@ for (const feed of feeds) {
       if (!ai.qualified) continue;
     }
 
-    const vertical = tagVertical(record, verticals);
+    const verticalsMatched = tagVertical(record, verticals);
 
     const payload = {
       ...record,
       intentScore: score,
       aiQualified: true,
       aiReason: ai.reason,
-      vertical,
+      verticalsMatched,
     };
 
     if (isDryRun) {

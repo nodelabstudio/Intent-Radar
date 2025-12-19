@@ -16,19 +16,7 @@ Inbound Lead Signals is a signal-detection system.
 
 It watches selected public sources, evaluates posts using a set of rules, and surfaces only the ones that show **genuine intent** — the kind that usually precedes a buying decision.
 
-Every record is explainable.
-Nothing is guesswork.
-
----
-
-## What this is not
-
-- Not a general RSS reader
-- Not a scraping-for-volume tool
-- Not a marketing automation platform
-- Not a spam engine
-
-If something shows up here, it’s because it crossed a meaningful threshold.
+Every record is explainable and nothing is guesswork.
 
 ---
 
@@ -44,17 +32,6 @@ The system favors **precision over coverage**.
 
 ---
 
-## Design principles
-
-- Signal > volume
-- Deterministic rules before heuristics
-- Explainability over cleverness
-- Small surface area, composable parts
-
-If you can’t explain why a post was flagged, it doesn’t belong.
-
----
-
 ## Intended use
 
 This project is designed to support:
@@ -67,6 +44,15 @@ This project is designed to support:
 It intentionally does **not** handle outreach or engagement.
 
 ---
+
+## Basic mental model
+
+| Layer    | Purpose                      | File              |
+| -------- | ---------------------------- | ----------------- |
+| Feeds    | Where to listen              | feeds.intent.json |
+| Keywords | What language signals intent | keywords.json     |
+| Scoring  | Should this pass?            | keywordScore.js   |
+| Tagging  | How to organize it           | verticals.json    |
 
 ## Status
 

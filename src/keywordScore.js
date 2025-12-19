@@ -1,13 +1,20 @@
-export default function scoreIntent(record, keywords) {
-  const text = record.text.toLowerCase();
+export default function scoreIntent(record, keywordsConfig) {
+  const text = `${record.title} ${record.body}`.toLowerCase();
 
   let best = Infinity;
 
-  for (const { phrase, score } of keywords) {
+  const allKeywords = Object.values(keywordsConfig).flat();
+
+  for (const { phrase, score } of allKeywords) {
+    if (!phrase) continue;
+
     if (text.includes(phrase.toLowerCase())) {
       best = Math.min(best, score);
     }
   }
 
-  return best === Infinity ? 99 : best;
+  return {
+    qualifies: best <= 2,
+    score: best === Infinity ? null : best,
+  };
 }
