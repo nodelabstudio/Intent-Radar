@@ -1,0 +1,13 @@
+{
+  "name": "intent-radar",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "dry-run": "node src/index.js --dry-run"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
