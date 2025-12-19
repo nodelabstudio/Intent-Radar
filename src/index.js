@@ -5,9 +5,9 @@ import verticals from '../verticals.json' assert { type: 'json' };
 import fetchRedditRss from './redditRss.js';
 import normalize from './normalize.js';
 import scoreIntent from './keywordScore.js';
-import aiGate from './aiGate.js';
-import tagVertical from './tagVertical.js';
-import upsert from './upsert.js';
+import tagVertical from './tagVerticals.js';
+// import aiGate from './aiGate.js';
+// import upsert from './upsert.js';
 
 const isDryRun = process.argv.includes('--dry-run');
 
@@ -25,8 +25,13 @@ for (const feed of feeds) {
     const score = scoreIntent(record, keywords);
     if (!score.qualifies) continue;
 
-    const ai = await aiGate(record);
-    if (!ai.qualified) continue;
+    let ai = { qualified: true, reason: 'dry-run bypass' };
+
+    if (!isDryRun) {
+      const { default: aiGate } = await import('./aiGate.js');
+      ai = await aiGate(record);
+      if (!ai.qualified) continue;
+    }
 
     const vertical = tagVertical(record, verticals);
 
@@ -50,6 +55,7 @@ for (const feed of feeds) {
         url: payload.url,
       });
     } else {
+      const { default: upsert } = await import('./upsert.js');
       await upsert(payload);
     }
   }
