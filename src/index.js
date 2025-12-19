@@ -15,7 +15,7 @@ import {
   updateAuthorReputation,
   shouldSkipAuthor,
 } from './leadSignals/detector/authorReputation.js';
-
+import { CONFIDENCE_THRESHOLDS } from './config/config.js';
 import { hasSeenUrl, markSeenUrl } from './leadSignals/detector/urlDedupe.js';
 import { AI_LIMITS } from './config/config.js';
 
@@ -59,13 +59,20 @@ for (const feed of feeds) {
     const score = scoreIntent(record, keywords);
     if (!score.qualifies) continue;
 
-    const threshold = getConfidenceThreshold(record.subreddit);
+    const subredditKey = record.subreddit.toLowerCase();
+    const threshold =
+      CONFIDENCE_THRESHOLDS[subredditKey] ?? CONFIDENCE_THRESHOLDS.default;
 
     if (score.confidence < threshold) {
-      console.log(
-        `[NEAR-MISS] sr:${record.subreddit} conf:${score.confidence} < ${threshold}`,
-        score.matchedPhrases
-      );
+      console.log('[NEAR-MISS]', {
+        subreddit: record.subreddit,
+        threshold,
+        confidence: score.confidence,
+        matched: score.matchedPhrases,
+        categories: score.categories,
+        title: record.title,
+        url: record.url,
+      });
       continue;
     }
 
