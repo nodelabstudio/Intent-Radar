@@ -12,7 +12,6 @@ import isSellerPost from './leadSignals/detector/isSellerPost.js';
 import isSellerIntent from './leadSignals/detector/isSellerIntent.js';
 
 import {
-  markAuthorSeen,
   updateAuthorReputation,
   shouldSkipAuthor,
 } from './leadSignals/detector/authorReputation.js';
@@ -28,6 +27,10 @@ import {
 
 const isDryRun = process.argv.includes('--dry-run');
 let aiCallsThisRun = 0;
+
+if (!process.env.QB_REALM || !process.env.QB_USER_TOKEN) {
+  throw new Error('Quickbase environment variables are missing');
+}
 
 if (!Array.isArray(feeds) || feeds.length === 0) {
   process.exit(0);
@@ -47,7 +50,6 @@ for (const feed of feeds) {
 
     if (isSellerPost(record) || isSellerIntent(record)) {
       if (record.author) {
-        markAuthorSeen(record.author, record.subreddit, record.url);
         updateAuthorReputation(
           record.author,
           record.subreddit,
@@ -56,10 +58,6 @@ for (const feed of feeds) {
         );
       }
       continue;
-    }
-
-    if (record.author) {
-      markAuthorSeen(record.author, record.subreddit, record.url);
     }
 
     const score = scoreIntent(record, keywords);
@@ -80,7 +78,10 @@ for (const feed of feeds) {
       continue;
     }
 
-    if (shouldSkipAuthor(record.author, record.subreddit, record.url)) {
+    if (
+      record.author &&
+      shouldSkipAuthor(record.author, record.subreddit, record.url)
+    ) {
       continue;
     }
 
@@ -99,12 +100,14 @@ for (const feed of feeds) {
       if (!ai.qualified) continue;
     }
 
-    updateAuthorReputation(
-      record.author,
-      record.subreddit,
-      'qualified',
-      record.url
-    );
+    if (record.author) {
+      updateAuthorReputation(
+        record.author,
+        record.subreddit,
+        'qualified',
+        record.url
+      );
+    }
 
     const verticalsMatched = tagVerticals(record, verticals);
 
