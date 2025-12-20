@@ -12,7 +12,7 @@ export default function scoreIntent(record, keywordsConfig) {
     if (!phrase) continue;
 
     if (text.includes(phrase.toLowerCase())) {
-      matchedPhrases.push({ phrase, score, category });
+      matchedPhrases.push(phrase);
       categories.add(category);
       bestScore = Math.min(bestScore, score);
     }
@@ -23,22 +23,14 @@ export default function scoreIntent(record, keywordsConfig) {
   let confidence = 0;
 
   if (qualifies) {
-    const intentStrength = matchedPhrases.some(p => p.score === 1) ? 1 : 0.7;
+    const scoreWeight =
+      (minimum_trigger_score - bestScore + 1) / minimum_trigger_score;
 
-    const phraseDensity = Math.min(matchedPhrases.length / 4, 1);
-    const categoryBreadth = Math.min(categories.size / 3, 1);
-
-    let substance = 0;
-    if (wordCount >= 40) substance = 1;
-    else if (wordCount >= 20) substance = 0.7;
-    else if (wordCount >= 10) substance = 0.4;
-    else substance = 0.2;
+    const phraseWeight = Math.min(matchedPhrases.length / 3, 1);
+    const categoryWeight = Math.min(categories.size / 2, 1);
 
     confidence =
-      intentStrength * 0.4 +
-      phraseDensity * 0.25 +
-      categoryBreadth * 0.2 +
-      substance * 0.15;
+      scoreWeight * 0.55 + phraseWeight * 0.3 + categoryWeight * 0.15;
 
     confidence = Math.round(confidence * 100) / 100;
   }
@@ -47,7 +39,7 @@ export default function scoreIntent(record, keywordsConfig) {
     qualifies,
     score: bestScore === Infinity ? null : bestScore,
     confidence,
-    matchedPhrases: matchedPhrases.map(p => p.phrase),
+    matchedPhrases,
     categories: Array.from(categories),
     wordCount,
   };

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import feeds from '../feeds.intent.json' assert { type: 'json' };
 import keywords from '../keywords.json' assert { type: 'json' };
 import verticals from '../verticals.json' assert { type: 'json' };
@@ -15,12 +16,17 @@ import {
   updateAuthorReputation,
   shouldSkipAuthor,
 } from './leadSignals/detector/authorReputation.js';
-import { CONFIDENCE_THRESHOLDS } from './config/config.js';
+
 import { hasSeenUrl, markSeenUrl } from './leadSignals/detector/urlDedupe.js';
-import { AI_LIMITS } from './config/config.js';
+import { AI_LIMITS, CONFIDENCE_THRESHOLDS } from './config/config.js';
+
+import {
+  canUseAiToday,
+  getDailyAiCount,
+  incrementDailyAiCount,
+} from './leadSignals/detector/aiUsage.js';
 
 const isDryRun = process.argv.includes('--dry-run');
-
 let aiCallsThisRun = 0;
 
 if (!Array.isArray(feeds) || feeds.length === 0) {
@@ -29,32 +35,32 @@ if (!Array.isArray(feeds) || feeds.length === 0) {
 
 for (const feed of feeds) {
   const items = await fetchRedditRss(feed);
-  console.log(`[DEBUG] ${feed.source}: fetched ${items.length} items`);
 
   for (const raw of items) {
     const record = normalize(raw);
-
     if (!record?.url) continue;
 
-    if (hasSeenUrl(record.url)) {
-      continue;
+    if (!isDryRun) {
+      if (hasSeenUrl(record.url)) continue;
+      markSeenUrl(record.url);
     }
-    markSeenUrl(record.url);
 
     if (isSellerPost(record) || isSellerIntent(record)) {
       if (record.author) {
-        updateAuthorReputation(record.author, record.subreddit, 'seller');
+        markAuthorSeen(record.author, record.subreddit, record.url);
+        updateAuthorReputation(
+          record.author,
+          record.subreddit,
+          'seller',
+          record.url
+        );
       }
       continue;
     }
 
     if (record.author) {
-      markAuthorSeen(record.author, record.subreddit);
+      markAuthorSeen(record.author, record.subreddit, record.url);
     }
-
-    console.log(
-      `[DEBUG] sr:${record.subreddit} / checking post: ${record.title}`
-    );
 
     const score = scoreIntent(record, keywords);
     if (!score.qualifies) continue;
@@ -64,37 +70,41 @@ for (const feed of feeds) {
       CONFIDENCE_THRESHOLDS[subredditKey] ?? CONFIDENCE_THRESHOLDS.default;
 
     if (score.confidence < threshold) {
-      console.log('[NEAR-MISS]', {
+      console.log('[NEAR MISS]', {
         subreddit: record.subreddit,
-        threshold,
-        confidence: score.confidence,
-        matched: score.matchedPhrases,
-        categories: score.categories,
         title: record.title,
-        url: record.url,
+        confidence: score.confidence,
+        threshold,
+        phrases: score.matchedPhrases,
       });
       continue;
     }
 
-    if (shouldSkipAuthor(record.author, record.subreddit)) {
+    if (shouldSkipAuthor(record.author, record.subreddit, record.url)) {
       continue;
     }
 
     let ai = { qualified: true, reason: 'dry-run bypass' };
 
     if (!isDryRun) {
-      if (aiCallsThisRun >= AI_LIMITS.MAX_CALLS_PER_RUN) {
-        break;
-      }
+      if (!canUseAiToday(AI_LIMITS.MAX_CALLS_PER_DAY)) break;
+      if (aiCallsThisRun >= AI_LIMITS.MAX_CALLS_PER_RUN) break;
 
       const { default: aiGate } = await import('./aiGate.js');
-      aiCallsThisRun += 1;
-      ai = await aiGate(record);
 
+      aiCallsThisRun += 1;
+      incrementDailyAiCount(1);
+
+      ai = await aiGate(record);
       if (!ai.qualified) continue;
     }
 
-    updateAuthorReputation(record.author, record.subreddit, 'qualified');
+    updateAuthorReputation(
+      record.author,
+      record.subreddit,
+      'qualified',
+      record.url
+    );
 
     const verticalsMatched = tagVerticals(record, verticals);
 
@@ -112,9 +122,9 @@ for (const feed of feeds) {
         title: payload.title,
         subreddit: payload.subreddit,
         author: payload.author,
-        intentScore: payload.intentScore,
+        confidence: score.confidence,
+        phrases: score.matchedPhrases,
         verticals: payload.verticals,
-        aiReason: payload.aiReason,
         url: payload.url,
       });
     } else {
@@ -125,8 +135,9 @@ for (const feed of feeds) {
 }
 
 if (!isDryRun) {
+  const usedToday = getDailyAiCount();
   console.log(
-    `[AI USAGE] ${aiCallsThisRun} AI calls used (cap: ${AI_LIMITS.MAX_CALLS_PER_RUN})`
+    `[AI USAGE] run=${aiCallsThisRun}/${AI_LIMITS.MAX_CALLS_PER_RUN} today=${usedToday}/${AI_LIMITS.MAX_CALLS_PER_DAY}`
   );
 }
 
