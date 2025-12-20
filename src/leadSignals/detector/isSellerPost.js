@@ -1,3 +1,6 @@
+// Seller post filter — v1.0
+// Hard filter: excludes self-promotion, offers, services
+// Change ONLY when introducing a new seller-filter version
 import { SELLER_RULES } from '../../config/sellerRules.js';
 
 export default function isSellerPost(record) {

@@ -1,11 +1,8 @@
-// export const AI_LIMITS = {
-//   MAX_CALLS_PER_RUN: 10,
-//   MAX_CALLS_PER_DAY: 50,
-// };
+export const CONFIG_VERSION = 'v1.0';
 
-// For test purposes, we can set the limits to a lower value:
+// Frozen for v1
 export const AI_LIMITS = {
-  MAX_CALLS_PER_RUN: 2,
+  MAX_CALLS_PER_RUN: 1,
   MAX_CALLS_PER_DAY: 2,
 };
 
