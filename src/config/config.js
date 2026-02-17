@@ -1,15 +1,21 @@
-export const CONFIG_VERSION = 'v1.0';
+export const CONFIG_VERSION = 'v1.1';
 
-// Frozen for v1
 export const AI_LIMITS = {
-  MAX_CALLS_PER_RUN: 1,
-  MAX_CALLS_PER_DAY: 2,
+  MAX_CALLS_PER_RUN: 5,
+  MAX_CALLS_PER_DAY: 10,
 };
 
 export const CONFIDENCE_THRESHOLDS = {
+  photography: 0.40,
+  askphotography: 0.40,
+  writing: 0.45,
+  selfpublish: 0.45,
+  freelancewriters: 0.45,
+  selfimprovement: 0.45,
+  getdisciplined: 0.45,
   realestatetechnology: 0.45,
   realestatemarketing: 0.5,
-  smallbusiness: 0.55,
-  entrepreneurridealong: 0.55,
-  default: 0.5,
+  smallbusiness: 0.50,
+  entrepreneurridealong: 0.50,
+  default: 0.45,
 };

@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "minimum_trigger_score": 2,
+  "version": 2,
+  "minimum_trigger_score": 3,
 
   "keywords": [
     {
@@ -18,6 +18,32 @@
       "score": 3,
       "category": "implicit_intent"
     },
+    {
+      "phrase": "how do you manage",
+      "score": 3,
+      "category": "implicit_intent"
+    },
+    {
+      "phrase": "how do you handle",
+      "score": 3,
+      "category": "implicit_intent"
+    },
+    {
+      "phrase": "any apps",
+      "score": 3,
+      "category": "implicit_intent"
+    },
+    {
+      "phrase": "any tools",
+      "score": 3,
+      "category": "implicit_intent"
+    },
+    {
+      "phrase": "better way",
+      "score": 3,
+      "category": "implicit_intent"
+    },
+
     {
       "phrase": "any better way",
       "score": 2,
@@ -44,17 +70,7 @@
       "category": "explicit_intent"
     },
     {
-      "phrase": "spending too much time",
-      "score": 2,
-      "category": "explicit_intent"
-    },
-    {
       "phrase": "anyone using software",
-      "score": 2,
-      "category": "explicit_intent"
-    },
-    {
-      "phrase": "manual process",
       "score": 2,
       "category": "explicit_intent"
     },
@@ -63,6 +79,27 @@
       "score": 2,
       "category": "explicit_intent"
     },
+    {
+      "phrase": "anyone know of",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "can anyone recommend",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "any suggestions for",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "looking for something",
+      "score": 2,
+      "category": "explicit_intent"
+    },
+
     {
       "phrase": "need a tool",
       "score": 1,
@@ -74,12 +111,32 @@
       "category": "explicit_intent"
     },
     {
-      "phrase": "anyone using software",
+      "phrase": "looking for software",
       "score": 1,
       "category": "explicit_intent"
     },
     {
-      "phrase": "looking for software",
+      "phrase": "need an app",
+      "score": 1,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "need software",
+      "score": 1,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "looking for a tool",
+      "score": 1,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "looking for an app",
+      "score": 1,
+      "category": "explicit_intent"
+    },
+    {
+      "phrase": "is there a tool",
       "score": 1,
       "category": "explicit_intent"
     },
@@ -101,6 +158,31 @@
     },
     {
       "phrase": "this is killing me",
+      "score": 2,
+      "category": "pain"
+    },
+    {
+      "phrase": "wish there was",
+      "score": 2,
+      "category": "pain"
+    },
+    {
+      "phrase": "there has to be a better",
+      "score": 2,
+      "category": "pain"
+    },
+    {
+      "phrase": "frustrated with",
+      "score": 2,
+      "category": "pain"
+    },
+    {
+      "phrase": "tired of",
+      "score": 2,
+      "category": "pain"
+    },
+    {
+      "phrase": "struggling with",
       "score": 2,
       "category": "pain"
     },
@@ -128,6 +210,36 @@
     },
     {
       "phrase": "alternatives to",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "what app do you use",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "what software do you use",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "what do you guys use",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "switching from",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "alternative to",
+      "score": 2,
+      "category": "comparison"
+    },
+    {
+      "phrase": "replaced",
       "score": 2,
       "category": "comparison"
     }
