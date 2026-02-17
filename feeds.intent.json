@@ -1,32 +1,8 @@
 [
   {
-    "source": "Reddit: r/realestate",
-    "type": "reddit",
-    "subreddit": "realestate",
-    "sort": "new"
-  },
-  {
-    "source": "Reddit: r/RealEstateAgents",
-    "type": "reddit",
-    "subreddit": "RealEstateAgents",
-    "sort": "new"
-  },
-  {
-    "source": "Reddit: r/realtors",
-    "type": "reddit",
-    "subreddit": "realtors",
-    "sort": "new"
-  },
-  {
     "source": "Reddit: r/smallbusiness",
     "type": "reddit",
     "subreddit": "smallbusiness",
-    "sort": "new"
-  },
-  {
-    "source": "Reddit: r/EntrepreneurRideAlong",
-    "type": "reddit",
-    "subreddit": "EntrepreneurRideAlong",
     "sort": "new"
   },
   {
@@ -36,9 +12,51 @@
     "sort": "new"
   },
   {
-    "source": "Reddit: r/RealEstateMarketing",
+    "source": "Reddit: r/selfimprovement",
     "type": "reddit",
-    "subreddit": "RealEstateMarketing",
+    "subreddit": "selfimprovement",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/GetDisciplined",
+    "type": "reddit",
+    "subreddit": "GetDisciplined",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/writing",
+    "type": "reddit",
+    "subreddit": "writing",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/selfpublish",
+    "type": "reddit",
+    "subreddit": "selfpublish",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/freelanceWriters",
+    "type": "reddit",
+    "subreddit": "freelanceWriters",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/photography",
+    "type": "reddit",
+    "subreddit": "photography",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/AskPhotography",
+    "type": "reddit",
+    "subreddit": "AskPhotography",
+    "sort": "new"
+  },
+  {
+    "source": "Reddit: r/RealEstatePhotography",
+    "type": "reddit",
+    "subreddit": "RealEstatePhotography",
     "sort": "new"
   }
 ]

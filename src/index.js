@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import feeds from '../feeds.intent.json' assert { type: 'json' };
-import keywords from '../keywords.json' assert { type: 'json' };
-import verticals from '../verticals.json' assert { type: 'json' };
+import feeds from '../feeds.intent.json' with { type: 'json' };
+import keywords from '../keywords.json' with { type: 'json' };
+import verticals from '../verticals.json' with { type: 'json' };
 
 import fetchRedditRss from './redditRss.js';
 import normalize from './normalize.js';
@@ -44,177 +44,181 @@ if (!Array.isArray(feeds) || feeds.length === 0) {
 }
 
 for (const feed of feeds) {
-  console.log('[FEED START]', feed);
+  try {
+    console.log('[FEED START]', feed);
 
-  const items = await fetchRedditRss(feed);
-  console.log('[FEED FETCHED]', {
-    source: feed.source ?? null,
-    count: Array.isArray(items) ? items.length : 'invalid',
-  });
-
-  for (const raw of items) {
-    debug('[RAW ITEM]', {
-      title: raw?.title ?? null,
-      url: raw?.url ?? raw?.link ?? null,
+    const items = await fetchRedditRss(feed);
+    console.log('[FEED FETCHED]', {
+      source: feed.source ?? null,
+      count: Array.isArray(items) ? items.length : 'invalid',
     });
 
-    const record = normalize(raw);
+    for (const raw of items) {
+      debug('[RAW ITEM]', {
+        title: raw?.title ?? null,
+        url: raw?.url ?? raw?.link ?? null,
+      });
 
-    debug('[NORMALIZED]', {
-      title: record.title,
-      subreddit: record.subreddit,
-      author: record.author,
-      url: record.url,
-    });
+      const record = normalize(raw);
 
-    if (!record?.url) {
-      console.log('[SKIP] missing url');
-      continue;
-    }
+      debug('[NORMALIZED]', {
+        title: record.title,
+        subreddit: record.subreddit,
+        author: record.author,
+        url: record.url,
+      });
 
-    if (!isDryRun && process.env.FORCE_SINGLE_WRITE !== '1') {
-      if (process.env.FORCE_SINGLE_WRITE !== '1' && hasSeenUrl(record.url)) {
-        debug('[DEDUPED URL]', record.url);
+      if (!record?.url) {
+        console.log('[SKIP] missing url');
         continue;
       }
 
-      if (process.env.FORCE_SINGLE_WRITE !== '1') {
-        markSeenUrl(record.url);
-      }
-    }
+      if (!isDryRun && process.env.FORCE_SINGLE_WRITE !== '1') {
+        if (process.env.FORCE_SINGLE_WRITE !== '1' && hasSeenUrl(record.url)) {
+          debug('[DEDUPED URL]', record.url);
+          continue;
+        }
 
-    if (
-      isSellerPost(record) ||
-      (isSellerIntent(record) && process.env.FORCE_SINGLE_WRITE !== '1')
-    ) {
-      console.log('[FILTERED SELLER]', record.title);
+        if (process.env.FORCE_SINGLE_WRITE !== '1') {
+          markSeenUrl(record.url);
+        }
+      }
+
+      if (
+        isSellerPost(record) ||
+        (isSellerIntent(record) && process.env.FORCE_SINGLE_WRITE !== '1')
+      ) {
+        console.log('[FILTERED SELLER]', record.title);
+        if (record.author) {
+          updateAuthorReputation(
+            record.author,
+            record.subreddit,
+            'seller',
+            record.url
+          );
+        }
+        continue;
+      }
+
+      debug('[SCORING]', record.title);
+
+      const score = scoreIntent(record, keywords);
+
+      if (process.env.FORCE_SINGLE_WRITE === '1') {
+        score.qualifies = true;
+        score.confidence = 1;
+      }
+
+      const subredditKey = record.subreddit.toLowerCase();
+
+      const baseThreshold =
+        CONFIDENCE_THRESHOLDS[subredditKey] ?? CONFIDENCE_THRESHOLDS.default;
+
+      const threshold =
+        process.env.LOWER_THRESH === '1'
+          ? Math.min(0.5, baseThreshold)
+          : baseThreshold;
+      console.log('[SCORE RESULT]', {
+        title: record.title,
+        qualifies: score.qualifies,
+        confidence: score.confidence,
+        phrases: score.matchedPhrases,
+      });
+      if (!score.qualifies) continue;
+
+      console.log('[THRESHOLD]', {
+        subreddit: record.subreddit,
+        threshold,
+      });
+
+      if (score.confidence < threshold) {
+        console.log('[NEAR MISS]', {
+          subreddit: record.subreddit,
+          title: record.title,
+          confidence: score.confidence,
+          threshold,
+          matchedPhrases: score.matchedPhrases,
+          categories: score.categories,
+          url: record.url,
+        });
+        continue;
+      }
+
+      if (
+        record.author &&
+        shouldSkipAuthor(record.author, record.subreddit, record.url)
+      ) {
+        console.log('[SKIP AUTHOR]', record.author);
+        continue;
+      }
+
+      console.log('[PRE-AI]', {
+        title: record.title,
+        confidence: score.confidence,
+        threshold,
+      });
+
+      // AI GATE
+      let ai = { qualified: true, reason: 'force-write bypass' };
+
+      if (!isDryRun && process.env.FORCE_SINGLE_WRITE !== '1') {
+        if (!canUseAiToday(AI_LIMITS.MAX_CALLS_PER_DAY)) {
+          continue;
+        }
+
+        if (aiCallsThisRun >= AI_LIMITS.MAX_CALLS_PER_RUN) {
+          continue;
+        }
+
+        const { default: aiGate } = await import('./aiGate.js');
+
+        aiCallsThisRun += 1;
+        incrementDailyAiCount(1);
+
+        ai = await aiGate(record);
+        if (!ai.qualified) continue;
+      }
+      // END AI GATE
+
       if (record.author) {
         updateAuthorReputation(
           record.author,
           record.subreddit,
-          'seller',
+          'qualified',
           record.url
         );
       }
-      continue;
-    }
 
-    debug('[SCORING]', record.title);
+      const verticalsMatched = tagVerticals(record, verticals);
 
-    const score = scoreIntent(record, keywords);
+      const payload = {
+        ...record,
+        intentScore: score,
+        aiQualified: true,
+        aiReason: ai.reason,
+        verticals: verticalsMatched,
+      };
 
-    if (process.env.FORCE_SINGLE_WRITE === '1') {
-      score.qualifies = true;
-      score.confidence = 1;
-    }
-
-    const subredditKey = record.subreddit.toLowerCase();
-
-    const baseThreshold =
-      CONFIDENCE_THRESHOLDS[subredditKey] ?? CONFIDENCE_THRESHOLDS.default;
-
-    const threshold =
-      process.env.LOWER_THRESH === '1'
-        ? Math.min(0.5, baseThreshold)
-        : baseThreshold;
-    console.log('[SCORE RESULT]', {
-      title: record.title,
-      qualifies: score.qualifies,
-      confidence: score.confidence,
-      phrases: score.matchedPhrases,
-    });
-    if (!score.qualifies) continue;
-
-    console.log('[THRESHOLD]', {
-      subreddit: record.subreddit,
-      threshold,
-    });
-
-    if (score.confidence < threshold) {
-      console.log('[NEAR MISS]', {
-        subreddit: record.subreddit,
-        title: record.title,
-        confidence: score.confidence,
-        threshold,
-        matchedPhrases: score.matchedPhrases,
-        categories: score.categories,
-        url: record.url,
-      });
-      continue;
-    }
-
-    if (
-      record.author &&
-      shouldSkipAuthor(record.author, record.subreddit, record.url)
-    ) {
-      console.log('[SKIP AUTHOR]', record.author);
-      continue;
-    }
-
-    console.log('[PRE-AI]', {
-      title: record.title,
-      confidence: score.confidence,
-      threshold,
-    });
-
-    // AI GATE
-    let ai = { qualified: true, reason: 'force-write bypass' };
-
-    if (!isDryRun && process.env.FORCE_SINGLE_WRITE !== '1') {
-      if (!canUseAiToday(AI_LIMITS.MAX_CALLS_PER_DAY)) {
-        continue;
+      if (isDryRun) {
+        console.log('--- INBOUND LEAD SIGNAL ---');
+        console.log({
+          title: payload.title,
+          subreddit: payload.subreddit,
+          author: payload.author,
+          confidence: score.confidence,
+          phrases: score.matchedPhrases,
+          verticals: payload.verticals,
+          url: payload.url,
+        });
+      } else {
+        console.log('[QB WRITE START]', payload.title);
+        const { default: upsert } = await import('./upsert.js');
+        await upsert(payload);
+        console.log('[QB WRITE SUCCESS]', payload.title);
       }
-
-      if (aiCallsThisRun >= AI_LIMITS.MAX_CALLS_PER_RUN) {
-        continue;
-      }
-
-      const { default: aiGate } = await import('./aiGate.js');
-
-      aiCallsThisRun += 1;
-      incrementDailyAiCount(1);
-
-      ai = await aiGate(record);
-      if (!ai.qualified) continue;
     }
-    // END AI GATE
-
-    if (record.author) {
-      updateAuthorReputation(
-        record.author,
-        record.subreddit,
-        'qualified',
-        record.url
-      );
-    }
-
-    const verticalsMatched = tagVerticals(record, verticals);
-
-    const payload = {
-      ...record,
-      intentScore: score,
-      aiQualified: true,
-      aiReason: ai.reason,
-      verticals: verticalsMatched,
-    };
-
-    if (isDryRun) {
-      console.log('--- INBOUND LEAD SIGNAL ---');
-      console.log({
-        title: payload.title,
-        subreddit: payload.subreddit,
-        author: payload.author,
-        confidence: score.confidence,
-        phrases: score.matchedPhrases,
-        verticals: payload.verticals,
-        url: payload.url,
-      });
-    } else {
-      console.log('[QB WRITE START]', payload.title);
-      const { default: upsert } = await import('./upsert.js');
-      await upsert(payload);
-      console.log('[QB WRITE SUCCESS]', payload.title);
-    }
+  } catch (error) {
+    console.error(`[FEED ERROR] Failed to process feed: ${JSON.stringify(feed)}`, error);
   }
 }
 

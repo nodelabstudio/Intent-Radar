@@ -2,43 +2,74 @@
   "version": 1,
   "verticals": [
     {
-      "name": "realestate",
-      "keywords": [
-        "real estate",
-        "realtor",
-        "listing",
-        "mls",
-        "broker",
-        "buyer",
-        "seller",
-        "open house"
-      ]
-    },
-    {
-      "name": "realestateagents",
-      "keywords": [
-        "real estate agent",
-        "agent",
-        "brokerage",
-        "leads",
-        "showings",
-        "crm"
-      ]
-    },
-    {
-      "name": "realestatemarketing",
-      "keywords": [
-        "marketing",
-        "facebook ads",
-        "google ads",
-        "zillow",
-        "lead gen",
-        "landing page"
-      ]
-    },
-    {
       "name": "realestatetechnology",
-      "keywords": ["software", "app", "platform", "saas", "tool", "crm"]
+      "keywords": [
+        "software",
+        "app",
+        "platform",
+        "saas",
+        "tool",
+        "crm",
+        "automation",
+        "proptech"
+      ]
+    },
+    {
+      "name": "smallbusiness",
+      "keywords": [
+        "startup",
+        "incorporation",
+        "payroll",
+        "hiring",
+        "marketing",
+        "taxes",
+        "funding",
+        "scaling",
+        "management"
+      ]
+    },
+    {
+      "name": "selfimprovement",
+      "keywords": [
+        "habits",
+        "discipline",
+        "productivity",
+        "routine",
+        "motivation",
+        "goals",
+        "mental health",
+        "meditation",
+        "focus"
+      ]
+    },
+    {
+      "name": "writing",
+      "keywords": [
+        "manuscript",
+        "publishing",
+        "freelance",
+        "editing",
+        "novel",
+        "blogging",
+        "copywriting",
+        "ghostwriting",
+        "author"
+      ]
+    },
+    {
+      "name": "photography",
+      "keywords": [
+        "camera",
+        "lens",
+        "lighting",
+        "editing",
+        "portfolio",
+        "client",
+        "studio",
+        "presets",
+        "photoshoot",
+        "videography"
+      ]
     }
   ]
 }
